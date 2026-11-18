@@ -55,17 +55,27 @@ alias wgt='winget'
 alias pcm='pacman'
 ## git
 function wt {
-  local sub='' root='' help=0
+  local sub='' root='' repo='' branch_arg='' help=0
   while (( $# )); do
     case $1 in
       -h|--help) help=1; shift ;;
       ls) sub=ls; shift ;;
+      add) sub=add; shift ;;
       -r|--root)
         if [[ -z ${2:-} ]]; then printf 'wt: %s needs a directory\n' "$1" >&2; return 2; fi
         root=$2; shift 2 ;;
-      *)
+      --repo)
+        if [[ -z ${2:-} ]]; then printf 'wt: --repo needs a directory\n' >&2; return 2; fi
+        repo=$2; shift 2 ;;
+      -*)
         printf 'wt: unknown argument: %s\nrun "wt --help" for usage.\n' "$1" >&2
         return 2 ;;
+      *)
+        if [[ -n $branch_arg ]]; then
+          printf 'wt: unexpected argument: %s\nrun "wt --help" for usage.\n' "$1" >&2
+          return 2
+        fi
+        branch_arg=$1; shift ;;
     esac
   done
 
@@ -80,11 +90,15 @@ worktrees; anywhere else it offers every worktree under DIR/.worktrees.
 Worktrees live under DIR/.worktrees, the layout tuios uses when [worktree]
 path is set in its config.toml.
 
-usage: wt [subcommand] [--root DIR]
+usage: wt [subcommand] [args]
 
   wt                pick a worktree and cd into it
   ls                list every worktree under DIR/.worktrees, without picking
+  add <branch>      create DIR/.worktrees/<repo>/<branch> and cd into it.
+                    Uses the current repository unless --repo DIR is given;
+                    a branch that does not exist yet is created from HEAD.
   -r, --root DIR    root directory (default: $GIT_BARE_ROOT or ~/git)
+  --repo DIR        repository for add (default: the current one)
   -h, --help        show this help
 EOF
     return 0
@@ -96,6 +110,41 @@ EOF
   local use_repo=0
   local line path branch skip repo_name d rel display place sorted picked
   local disp r b p
+
+  if [[ $sub == add ]]; then
+    [[ -n $branch_arg ]] || {
+      printf 'wt add: needs a branch name\nusage: wt add <branch> [--repo DIR]\n' >&2
+      return 2
+    }
+    local gdir=${repo:-.} common folder dest
+    common=$(git -C "$gdir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || {
+      printf 'wt add: not a git repository: %s\n' "$gdir" >&2
+      return 1
+    }
+    common=${common%/}
+    if [[ $common == */.git ]]; then
+      folder=$(basename "$(dirname "$common")")
+    else
+      folder=$(basename "$common")
+    fi
+    dest=$wt_root/$folder/$branch_arg
+    if [[ -e $dest ]]; then
+      printf 'wt add: already exists: %s\n' "$dest" >&2
+      return 1
+    fi
+    if git -C "$gdir" show-ref --verify --quiet "refs/heads/$branch_arg"; then
+      git -C "$gdir" worktree add "$dest" "$branch_arg" || return 1
+    else
+      git -C "$gdir" worktree add -b "$branch_arg" "$dest" || return 1
+    fi
+    cd -- "$dest"
+    return 0
+  fi
+
+  if [[ -n $branch_arg ]]; then
+    printf 'wt: unexpected argument: %s\nrun "wt --help" for usage.\n' "$branch_arg" >&2
+    return 2
+  fi
 
   if [[ $sub != ls ]] && git rev-parse --git-dir >/dev/null 2>&1; then
     use_repo=1

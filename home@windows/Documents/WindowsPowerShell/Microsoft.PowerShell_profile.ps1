@@ -57,19 +57,34 @@ New-Alias -Name ch -Value chezmoi
 function wt {
   $sub = $null
   $root = $null
+  $repo = $null
+  $branchArg = $null
   $help = $false
   for ($i = 0; $i -lt $args.Count; $i++) {
     switch -Regex ([string]$args[$i]) {
       '^(-h|--help)$' { $help = $true }
       '^ls$' { $sub = 'ls' }
+      '^add$' { $sub = 'add' }
       '^(-r|--root)$' {
         if ($i + 1 -ge $args.Count) { Write-Error "wt: $($args[$i]) needs a directory"; return }
         $i++
         $root = [string]$args[$i]
       }
+      '^--repo$' {
+        if ($i + 1 -ge $args.Count) { Write-Error 'wt: --repo needs a directory'; return }
+        $i++
+        $repo = [string]$args[$i]
+      }
       default {
-        Write-Error "wt: unknown argument: $($args[$i]); run 'wt --help' for usage."
-        return
+        if ([string]$args[$i] -like '-*') {
+          Write-Error "wt: unknown argument: $($args[$i]); run 'wt --help' for usage."
+          return
+        }
+        if ($branchArg) {
+          Write-Error "wt: unexpected argument: $($args[$i]); run 'wt --help' for usage."
+          return
+        }
+        $branchArg = [string]$args[$i]
       }
     }
   }
@@ -85,11 +100,15 @@ worktrees; anywhere else it offers every worktree under DIR/.worktrees.
 Worktrees live under DIR/.worktrees, the layout tuios uses when [worktree]
 path is set in its config.toml.
 
-usage: wt [subcommand] [--root DIR]
+usage: wt [subcommand] [args]
 
   wt                pick a worktree and cd into it
   ls                list every worktree under DIR/.worktrees, without picking
+  add <branch>      create DIR/.worktrees/<repo>/<branch> and cd into it.
+                    Uses the current repository unless --repo DIR is given;
+                    a branch that does not exist yet is created from HEAD.
   -r, --root DIR    root directory (default: $env:GIT_BARE_ROOT or ~/git)
+  --repo DIR        repository for add (default: the current one)
   -h, --help        show this help
 '@ | Out-Host
     return
@@ -97,6 +116,38 @@ usage: wt [subcommand] [--root DIR]
 
   $rootDir = if ($root) { $root } elseif ($env:GIT_BARE_ROOT) { $env:GIT_BARE_ROOT } else { Join-Path $HOME 'git' }
   $wtRoot = Join-Path $rootDir '.worktrees'
+
+  if ($sub -eq 'add') {
+    if (-not $branchArg) {
+      Write-Error 'wt add: needs a branch name. usage: wt add <branch> [--repo DIR]'
+      return
+    }
+    $gdir = if ($repo) { $repo } else { '.' }
+    $common = (& git -C $gdir rev-parse --path-format=absolute --git-common-dir 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not $common) { Write-Error "wt add: not a git repository: $gdir"; return }
+    $common = @($common)[0].TrimEnd('\', '/')
+    $folder = if ((Split-Path -Leaf $common) -eq '.git') {
+      Split-Path -Leaf (Split-Path -Parent $common)
+    } else {
+      Split-Path -Leaf $common
+    }
+    $dest = Join-Path (Join-Path $wtRoot $folder) $branchArg
+    if (Test-Path -LiteralPath $dest) { Write-Error "wt add: already exists: $dest"; return }
+    git -C $gdir show-ref --verify --quiet "refs/heads/$branchArg"
+    if ($LASTEXITCODE -eq 0) {
+      git -C $gdir worktree add $dest $branchArg
+    } else {
+      git -C $gdir worktree add -b $branchArg $dest
+    }
+    if ($LASTEXITCODE -ne 0) { return }
+    Set-Location -LiteralPath $dest
+    return
+  }
+
+  if ($branchArg) {
+    Write-Error "wt: unexpected argument: $branchArg; run 'wt --help' for usage."
+    return
+  }
 
   # Only when inside a repository does the interactive pick narrow to it, so
   # skip the git call for `ls`.

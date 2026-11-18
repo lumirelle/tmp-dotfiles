@@ -4,20 +4,33 @@
 # Inside a git repository it offers that repository's worktrees; anywhere else
 # it offers every worktree under <root>/.worktrees.
 #
-# Worktrees live under <root>/.worktrees, the layout tuios uses when
-# [worktree] path is set in its config.toml.
+# Worktrees live under <root>/.worktrees/{repo}/{branch}, the layout tuios uses
+# when [worktree] path is set in its config.toml. `wt add` creates one in the
+# same shape, from the current repository unless --repo says otherwise; a
+# branch that does not exist yet is created from HEAD.
 #
-#   wt                        # pick a worktree and cd into it
-#   wt ls                     # every worktree as a repo / branch / path table
-#   wt --root D:/work/repos   # another root; worktrees live in DIR/.worktrees
+#   wt                             # pick a worktree and cd into it
+#   wt ls                          # every worktree as a repo / branch / path table
+#   wt add feat/retry              # create <root>/.worktrees/<repo>/feat/retry, cd into it
+#   wt add fix --repo D:/src/api   # a worktree of another repository
+#   wt --root D:/work/repos        # another root; worktrees live in DIR/.worktrees
 #   $env.GIT_BARE_ROOT = '~/src'   # set a different default root
 export def --env wt [
-  subcommand?: string  # `ls` lists every worktree instead of picking one
+  subcommand?: string  # `ls` lists every worktree; `add <branch>` creates one
+  branch?: string      # branch name for `add`
   --root (-r): path    # root directory; default is $env.GIT_BARE_ROOT or ~/git
+  --repo: path         # repository for `add`; default is the current one
 ] {
   let sub = ($subcommand | default "")
-  if $sub not-in ["" "ls"] {
+  if $sub not-in ["" "ls" "add"] {
     error make { msg: $"wt: unknown subcommand: ($sub); see 'wt --help'" }
+  }
+  let branch_name = ($branch | default "")
+  if ($sub == "add") and (($branch_name | str length) == 0) {
+    error make { msg: "wt add: needs a branch name; see 'wt --help'" }
+  }
+  if ($sub != "add") and (($branch_name | str length) > 0) {
+    error make { msg: $"wt: unexpected argument: ($branch_name); see 'wt --help'" }
   }
 
   let root = (
@@ -27,6 +40,35 @@ export def --env wt [
   let wt_root = ($root | path join ".worktrees")
   # glob wants forward slashes, even where path join wrote backslashes
   let wt_glob_root = ($wt_root | str replace --all '\' '/')
+
+  # wt add: <root>/.worktrees/{repo}/{branch}, then cd into it
+  if $sub == "add" {
+    let gdir = ($repo | default ".")
+    let common = (^git -C $gdir rev-parse --path-format=absolute --git-common-dir | complete)
+    if $common.exit_code != 0 {
+      error make { msg: $"wt add: not a git repository: ($gdir)" }
+    }
+    let common_path = ($common.stdout | str trim)
+    let folder = (
+      if (($common_path | path basename) == ".git") {
+        $common_path | path dirname | path basename
+      } else {
+        $common_path | path basename
+      }
+    )
+    let dest = ($wt_root | path join $folder | path join $branch_name)
+    if ($dest | path exists) {
+      error make { msg: $"wt add: already exists: ($dest)" }
+    }
+    let local = (^git -C $gdir rev-parse --verify --quiet $"refs/heads/($branch_name)" | complete)
+    if $local.exit_code == 0 {
+      ^git -C $gdir worktree add $dest $branch_name
+    } else {
+      ^git -C $gdir worktree add -b $branch_name $dest
+    }
+    cd $dest
+    return
+  }
 
   # Only when inside a repository does the interactive pick narrow to it, so
   # skip the git call for `ls`.
