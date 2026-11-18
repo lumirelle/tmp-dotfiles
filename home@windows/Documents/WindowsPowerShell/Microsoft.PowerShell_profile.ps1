@@ -99,3 +99,5 @@ function tuios {
   }
 }
 Set-Alias -Name tos -Value tuios
+## ai
+New-Alias -Name cc -Value claude

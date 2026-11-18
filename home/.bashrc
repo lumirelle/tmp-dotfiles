@@ -96,3 +96,5 @@ function tuios {
   if [[ ${1:-} == wt ]]; then command tuios worktree "${@:2}"; else command tuios "$@"; fi
 }
 alias tos='tuios'
+## ai
+alias cc='claude'

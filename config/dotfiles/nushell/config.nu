@@ -20,4 +20,5 @@ source aliases/fastfetch.nu
 source aliases/pm.nu
 source aliases/git.nu
 source aliases/tuios.nu
+source aliases/ai.nu
 source aliases/scripts.nu
