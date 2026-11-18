@@ -1,6 +1,7 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 
 [settings]
+auto_install = false
 experimental = true
 lockfile = true
 # Keep the mise shim farm off PATH. Shims expose every executable a tool ships

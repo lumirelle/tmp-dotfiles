@@ -4,3 +4,6 @@ daemon = true
 
 [appearance]
 preferred_shell = "nu"
+
+[worktree]
+path = "~/git/.worktrees/{{ repo }}/{{ branch }}"

@@ -55,37 +55,109 @@ New-Alias -Name pcm -Value pacman
 New-Alias -Name ch -Value chezmoi
 ## git
 function wt {
-  param([string]$Root)
-  if (-not $Root) {
-    $Root = if ($env:GIT_BARE_ROOT) { $env:GIT_BARE_ROOT } else { Join-Path $HOME 'git' }
+  $sub = $null
+  $root = $null
+  $help = $false
+  for ($i = 0; $i -lt $args.Count; $i++) {
+    switch -Regex ([string]$args[$i]) {
+      '^(-h|--help)$' { $help = $true }
+      '^ls$' { $sub = 'ls' }
+      '^(-r|--root)$' {
+        if ($i + 1 -ge $args.Count) { Write-Error "wt: $($args[$i]) needs a directory"; return }
+        $i++
+        $root = [string]$args[$i]
+      }
+      default {
+        Write-Error "wt: unknown argument: $($args[$i]); run 'wt --help' for usage."
+        return
+      }
+    }
   }
-  if (-not (Test-Path -LiteralPath $Root)) { Write-Error "wt: no such directory: $Root"; return }
+
+  if ($help) {
+    @'
+Jump into a git worktree.
+
+With no subcommand, shows each worktree's repo / branch / path in fzf and
+cd's into the pick. Inside a git repository it offers that repository's
+worktrees; anywhere else it offers every worktree under DIR/.worktrees.
+
+Worktrees live under DIR/.worktrees, the layout tuios uses when [worktree]
+path is set in its config.toml.
+
+usage: wt [subcommand] [--root DIR]
+
+  wt                pick a worktree and cd into it
+  ls                list every worktree under DIR/.worktrees, without picking
+  -r, --root DIR    root directory (default: $env:GIT_BARE_ROOT or ~/git)
+  -h, --help        show this help
+'@ | Out-Host
+    return
+  }
+
+  $rootDir = if ($root) { $root } elseif ($env:GIT_BARE_ROOT) { $env:GIT_BARE_ROOT } else { Join-Path $HOME 'git' }
+  $wtRoot = Join-Path $rootDir '.worktrees'
+
+  # Only when inside a repository does the interactive pick narrow to it, so
+  # skip the git call for `ls`.
+  if ($sub -ne 'ls') {
+    git rev-parse --git-dir 2>$null | Out-Null
+    $useRepo = ($LASTEXITCODE -eq 0)
+  } else {
+    $useRepo = $false
+  }
+
   $rows = @()
-  foreach ($repo in Get-ChildItem -LiteralPath $Root -Directory -Filter *.git) {
-    $repoName = $repo.Name -replace '\.git$', ''
+  if ($useRepo) {
+    # inside a repository: every worktree git reports for it
+    $repoName = $null
     $path = $null
     $branch = 'detached'
     $skip = $false
-    foreach ($line in @(git -C $repo.FullName worktree list --porcelain 2>$null) + '') {
+    foreach ($line in @(git worktree list --porcelain 2>$null) + '') {
       if ($line -eq '') {
         if (-not $skip -and $path) {
-          $short = $path -replace '^.*[\\/]tuios[\\/]worktrees[\\/]', 'tuios/worktrees/'
-          $rows += "$repoName  $branch  $short`t$path"
+          $rows += [pscustomobject]@{ Repo = $repoName; Branch = $branch; Path = $path; Display = "$repoName  $branch  $path" }
         }
         $path = $null
         $branch = 'detached'
         $skip = $false
       } elseif ($line -like 'worktree *') {
         $path = $line.Substring(9)
+        if (-not $repoName) { $repoName = (Split-Path -Leaf $path) -replace '\.git$', '' }
       } elseif ($line -like 'branch refs/heads/*') {
         $branch = $line.Substring(18)
       } elseif ($line -in 'bare', 'prunable') {
         $skip = $true
       }
     }
+  } else {
+    if (-not (Test-Path -LiteralPath $wtRoot)) { Write-Error "wt: no such directory: $wtRoot"; return }
+    foreach ($gitFile in Get-ChildItem -LiteralPath $wtRoot -Recurse -Force -File -Filter '.git' -ErrorAction SilentlyContinue) {
+      $dir = $gitFile.DirectoryName
+      $branch = (& git -C $dir rev-parse --abbrev-ref HEAD 2>$null)
+      if ($LASTEXITCODE -ne 0) { continue }
+      if ($branch -eq 'HEAD') { $branch = 'detached' }
+      $rel = $dir.Substring($wtRoot.Length).TrimStart('\', '/')
+      $repoName = (($rel -split '[\\/]')[0]) -replace '\.git$', ''
+      $rows += [pscustomobject]@{ Repo = $repoName; Branch = $branch; Path = $dir; Display = "$repoName  $branch  $dir" }
+    }
   }
-  if ($rows.Count -eq 0) { Write-Error "wt: no worktrees under $Root"; return }
-  $picked = $rows | Sort-Object | fzf --delimiter '\t' --with-nth 1 --reverse --height 40% --prompt 'worktree> '
+
+  if ($rows.Count -eq 0) {
+    $place = if ($useRepo) { 'this repository' } else { $wtRoot }
+    Write-Error "wt: no worktrees under $place"
+    return
+  }
+
+  $rows = $rows | Sort-Object Repo, Branch, Path
+
+  if ($sub -eq 'ls') {
+    $rows | ForEach-Object { '{0}  {1}  {2}' -f $_.Repo, $_.Branch, $_.Path }
+    return
+  }
+
+  $picked = $rows | ForEach-Object { "$($_.Display)`t$($_.Path)" } | fzf --delimiter '\t' --with-nth 1 --reverse --height 40% --prompt 'worktree> '
   if (-not $picked) { return }
   Set-Location -LiteralPath ($picked -split "`t")[-1]
 }
