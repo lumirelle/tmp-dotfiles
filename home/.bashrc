@@ -69,7 +69,7 @@ function wt {
       case $line in
         '')
           if (( ! skip )) && [[ -n $path ]]; then
-            short=${path/#*[\/]tuios[\/]worktrees[\/]/tuios/worktrees/}
+            short=${path/#*\/tuios\/worktrees\//tuios/worktrees/}
             rows+=("$repo_name  $branch  $short"$'\t'"$path")
           fi
           path='' branch=detached skip=0 ;;
