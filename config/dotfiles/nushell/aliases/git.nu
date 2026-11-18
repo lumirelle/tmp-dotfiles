@@ -8,7 +8,7 @@
 # [worktree] path is set in its config.toml.
 #
 #   wt                        # pick a worktree and cd into it
-#   wt ls                     # list every worktree under <root>/.worktrees
+#   wt ls                     # every worktree as a repo / branch / path table
 #   wt --root D:/work/repos   # another root; worktrees live in DIR/.worktrees
 #   $env.GIT_BARE_ROOT = '~/src'   # set a different default root
 export def --env wt [
@@ -108,10 +108,9 @@ export def --env wt [
     return
   }
 
+  # a table: repo / branch / path, so it pipes like any other nushell data
   if $sub == "ls" {
-    $rows
-    | each {|r| print $"($r.repo)  ($r.branch)  ($r.path)" }
-    return
+    return $rows
   }
 
   let result = (
