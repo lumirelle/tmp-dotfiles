@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
+os:
+  editPreset: 'nvim-remote'
+{%- if os() == "windows" %}
+  edit: '{% raw %}if defined NVIM (nvim --server "%NVIM%" --remote-send "q" & nvim --server "%NVIM%" --remote-tab {{filename}}) else (nvim -- {{filename}}){% endraw %}'
+  editAtLine: '{% raw %}if defined NVIM (nvim --server "%NVIM%" --remote-send "q" & nvim --server "%NVIM%" --remote-tab {{filename}} & nvim --server "%NVIM%" --remote-send ":{{line}}<CR>") else (nvim +{{line}} -- {{filename}}){% endraw %}'
+  openDirInEditor: '{% raw %}if defined NVIM (nvim --server "%NVIM%" --remote-send "q" & nvim --server "%NVIM%" --remote-tab {{dir}}) else (nvim -- {{dir}}){% endraw %}'
+{%- endif %}

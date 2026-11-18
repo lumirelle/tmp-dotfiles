@@ -1,0 +1,189 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+
+[settings]
+experimental = true
+lockfile = true
+# Keep the mise shim farm off PATH. Shims expose every executable a tool ships
+# (e.g. nub bundles busybox.exe, which Git for Windows probes with
+# `busybox --help`), and shims for unconfigured tools only emit
+# "No version is set for shim" noise.
+# TODO: re-enable once the registry 'bins' field is used to filter exposure,
+# or another upstream fix lands: https://github.com/jdx/mise/issues/15773
+activate_shims = false
+
+[bootstrap.packages]
+# Desktop-only packages live in config.default.toml (default env, not loaded in WSL).
+# Windows Operator System Manager
+"winget:Fastfetch-cli.Fastfetch" = "latest"
+"winget:Clement.bottom" = "latest"
+"winget:dundee.gdu" = "latest"
+"winget:ChuyuTeam.DISM++" = "latest"
+"winget:RevoUninstaller.RevoUninstallerPro" = "latest"
+# Windows Environment/Infrastructure
+"winget:BrechtSanders.WinLibs.POSIX.UCRT" = "latest"
+"winget:FiloSottile.age" = "latest"
+"winget:jj-vcs.jj" = "latest"
+"winget:GitHub.cli" = "latest"
+"winget:GLab.GLab" = "latest"
+"winget:tree-sitter.tree-sitter-cli" = "latest"
+"winget:ImageMagick.ImageMagick" = "latest"
+"winget:Orange-OpenSource.Hurl" = "latest"
+"winget:WiresharkFoundation.Wireshark" = "latest"
+# Windows UX Enhance
+"winget:Brave.Brave" = "latest"
+"winget:ajeetdsouza.zoxide" = "latest"
+"winget:sharkdp.fd" = "latest"
+"winget:junegunn.fzf" = "latest"
+"winget:BurntSushi.ripgrep.MSVC" = "latest"
+"winget:JesseDuffield.lazygit" = "latest"
+"winget:sxyazi.yazi" = "latest"
+"winget:schollz.croc" = "latest"
+# Terminal & Shell on Windows
+"winget:Nushell.Nushell" = "latest"
+"winget:Starship.Starship" = "latest"
+# XXX: Please install TUIOS from GitHub Release: https://github.com/Gaurav-Gosain/tuios/releases
+# It hasn't been added to the Winget package registry yet. 
+# Development on Windows
+"winget:Neovim.Neovim" = "latest"
+"winget:Anthropic.ClaudeCode" = "latest"
+"winget:farion1231.CC-Switch" = "latest"
+"winget:sharkdp.hyperfine" = "latest"
+
+# Archlinux Operator System Manager
+"pacman:fastfetch" = "latest"
+"pacman:bottom" = "latest"
+"pacman:gdu" = "latest"
+# Archlinux Environment/Infrastructure
+"pacman:wl-clipboard" = "latest"
+"pacman:unzip" = "latest"
+"pacman:wget" = "latest"
+"pacman:less" = "latest"
+"pacman:fontconfig" = "latest"
+"pacman:noto-fonts-cjk" = "latest"
+"pacman:age" = "latest"
+"pacman:jujutsu" = "latest"
+"pacman:github-cli" = "latest"
+"pacman:glab" = "latest"
+"pacman:tree-sitter-cli" = "latest"
+"pacman:imagemagick" = "latest"
+"pacman:wireshark-cli" = "latest"
+"pacman:hurl" = "latest"
+# Archlinux UX Enhance
+"aur:brave-bin" = "latest"
+"pacman:zoxide" = "latest"
+"pacman:fd" = "latest"
+"pacman:fzf" = "latest"
+"pacman:ripgrep" = "latest"
+"pacman:lazygit" = "latest"
+"pacman:yazi" = "latest"
+"pacman:croc" = "latest"
+# Terminal & Shell on Archlinux
+"pacman:nushell" = "latest"
+"pacman:starship" = "latest"
+"aur:tuios-bin" = "latest"
+# Development on Archlinux
+"pacman:neovim" = "latest"
+"aur:claude-code" = "latest"
+"aur:cc-switch-bin" = "latest"
+"pacman:hyperfine" = "latest"
+
+[bootstrap.files]
+"/etc/sysctl.d/50-unprivileged-ports.conf" = { os = "linux", content = "net.ipv4.ip_unprivileged_port_start = 80"  }
+
+[tools]
+# Global But Not Included by Package Manager
+"github:SyrianTurk/SyrianSegoe" = { os = "windows", version = "latest" } # Replace Windows system (Latin) font
+fnox = "latest"
+"github:vercel-labs/agent-browser" = "latest"
+"github:vercel-labs/agent-desktop" = "latest"
+"github:gcla/termshark" = "latest"
+# Environment/Infrastructure
+node = { version = "latest", postinstall = "npm install -g degit" }
+bun = "latest"
+python = "latest"
+java = "lts"
+go = "latest"
+zig = "latest"
+
+[dotfiles]
+"~/.bashrc" = { mode = "track" }
+"~/.config/jj/config.toml" = { mode = "track" }
+"~/.config/mise/config.default.toml" = { mode = "track" }
+"~/.config/mise/config.toml" = { mode = "track" }
+"~/.config/mise/dotfiles/lazygit" = { mode = "track" }
+"~/.config/mise/dotfiles/nushell" = { mode = "track" }
+"~/.config/mise/dotfiles/nvim" = { mode = "track" }
+"~/.config/mise/dotfiles/rime" = { mode = "track", variants = [{ profile = "default" }] }
+"~/.config/mise/dotfiles/rio" = { mode = "track", variants = [{ profile = "default" }] }
+"~/.config/mise/dotfiles/tuios" = { mode = "track" }
+"~/.config/mise/dotfiles/vscode" = { mode = "track", variants = [{ profile = "default" }] }
+"~/.config/mise/dotfiles/zed" = { mode = "track", variants = [{ profile = "default" }] }
+"~/.config/mise/mise.lock" = { mode = "track" }
+"~/.config/mise/miserc.toml" = { mode = "track" }
+"~/.config/mise/scripts" = { mode = "track" }
+"~/.config/starship.toml" = { mode = "track" }
+"~/.gitconfig" = { mode = "track" }
+"~/.local/bin/ai.nu" = { mode = "track" }
+"~/.local/bin/build-pyyaml.nu" = { mode = "track" }
+"~/.local/bin/reset-cjk-font-fallback.nu" = { mode = "track", variants = [{ os = "windows" }] }
+"~/.local/bin/set-cjk-font-fallback.nu" = { mode = "track", variants = [{ os = "windows" }] }
+"~/.profile" = { mode = "track" }
+"~/.wslconfig" = { mode = "track", variants = [{ os = "windows" }] }
+"~/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1" = { mode = "track", variants = [
+  { os = "windows" },
+] }
+
+[dotfiles."dotfiles/nushell/aliases/"]
+mode = "copy"
+source = "dotfiles/nushell/aliases/"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/nushell/aliases/" },
+  { os = "linux", target = "~/.config/nushell/aliases/" },
+  { os = "windows", target = "~/AppData/Roaming/nushell/aliases/" },
+]
+
+[dotfiles."dotfiles/nushell/env.nu"]
+mode = "copy"
+source = "dotfiles/nushell/env.nu"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/nushell/env.nu" },
+  { os = "linux", target = "~/.config/nushell/env.nu" },
+  { os = "windows", target = "~/AppData/Roaming/nushell/env.nu" },
+]
+
+[dotfiles."dotfiles/nushell/config.nu"]
+mode = "copy"
+source = "dotfiles/nushell/config.nu"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/nushell/config.nu" },
+  { os = "linux", target = "~/.config/nushell/config.nu" },
+  { os = "windows", target = "~/AppData/Roaming/nushell/config.nu" },
+]
+
+[dotfiles."dotfiles/nvim/"]
+mode = "copy"
+source = "dotfiles/nvim/"
+variants = [
+  { os = "unix", target = "~/.config/nvim/" },
+  { os = "windows", target = "~/AppData/Local/nvim/" },
+]
+
+[dotfiles."dotfiles/lazygit/config.yml"]
+mode = "template"
+source = "dotfiles/lazygit/config.yml"
+variants = [
+  { os = "linux", target = "~/.config/lazygit/config.yml" },
+  { os = "macos", target = "~/Library/Application Support/lazygit/config.yml" },
+  { os = "windows", target = "~/AppData/Local/lazygit/config.yml" },
+]
+
+[dotfiles."dotfiles/tuios/config.toml"]
+mode = "copy"
+source = "dotfiles/tuios/config.toml"
+variants = [
+  { os = "unix", target = "~/.config/tuios/config.toml" },
+  { os = "windows", target = "~/AppData/Local/tuios/config.toml" },
+]
+
+[bootstrap.hooks.final]
+run = "tuios integration install claude"

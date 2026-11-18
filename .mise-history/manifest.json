@@ -1,0 +1,208 @@
+{
+  "format": 1,
+  "enrollment": [
+    {
+      "path": "config/config.default.toml",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "config/config.toml",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "config/dotfiles/lazygit",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "config/dotfiles/nushell",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "config/dotfiles/nvim",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "config/dotfiles/rime",
+      "autosave": true,
+      "encrypt": false,
+      "variants": [
+        {
+          "os": [],
+          "profile": "default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "path": "config/dotfiles/rio",
+      "autosave": true,
+      "encrypt": false,
+      "variants": [
+        {
+          "os": [],
+          "profile": "default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "path": "config/dotfiles/tuios",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "config/dotfiles/vscode",
+      "autosave": true,
+      "encrypt": false,
+      "variants": [
+        {
+          "os": [],
+          "profile": "default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "path": "config/dotfiles/zed",
+      "autosave": true,
+      "encrypt": false,
+      "variants": [
+        {
+          "os": [],
+          "profile": "default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "path": "config/mise.lock",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "config/miserc.toml",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "config/scripts",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "home/.bashrc",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "home/.config/jj/config.toml",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "home/.config/starship.toml",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "home/.gitconfig",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "home/.local/bin/ai.nu",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "home/.local/bin/build-pyyaml.nu",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "home/.local/bin/reset-cjk-font-fallback.nu",
+      "autosave": true,
+      "encrypt": false,
+      "variants": [
+        {
+          "os": [
+            "windows"
+          ],
+          "profile": null,
+          "default": false
+        }
+      ]
+    },
+    {
+      "path": "home/.local/bin/set-cjk-font-fallback.nu",
+      "autosave": true,
+      "encrypt": false,
+      "variants": [
+        {
+          "os": [
+            "windows"
+          ],
+          "profile": null,
+          "default": false
+        }
+      ]
+    },
+    {
+      "path": "home/.profile",
+      "autosave": true,
+      "encrypt": false,
+      "variants": []
+    },
+    {
+      "path": "home/.wslconfig",
+      "autosave": true,
+      "encrypt": false,
+      "variants": [
+        {
+          "os": [
+            "windows"
+          ],
+          "profile": null,
+          "default": false
+        }
+      ]
+    },
+    {
+      "path": "home/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1",
+      "autosave": true,
+      "encrypt": false,
+      "variants": [
+        {
+          "os": [
+            "windows"
+          ],
+          "profile": null,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "exclude": [],
+  "recipients": [],
+  "permissions": {}
+}

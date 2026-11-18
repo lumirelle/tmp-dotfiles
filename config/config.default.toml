@@ -1,0 +1,201 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+
+# Loaded only for the "default" config environment (non-WSL machines).
+# WSL selects env = ["wsl"] via ~/.config/mise/miserc.local.toml, so this file
+# is not read there. That keeps desktop-only packages and GUI-app dotfiles out
+# of WSL, and leaves the bootstrap task undefined in WSL.
+
+[bootstrap.packages]
+# Windows UX Enhance
+# XXX: Please install Rime Nightly Build from GitHub Release: https://github.com/rime/weasel/releases/tag/latest
+# My configuration requires librime v1.14.0+, and the latest stable version still uses librime v1.13.1.
+# "winget:Rime.Weasel" = "latest"
+"winget:Wox.Wox" = "latest"
+"winget:PixPin.PixPin" = "latest"
+"winget:9NBLGGH5R558" = "latest" # Microsoft To Do
+"winget:OBSProject.OBSStudio" = "latest"
+# Terminal & Shell on Windows
+"winget:raphamorim.rio" = "latest"
+# Development on Windows
+"winget:ZedIndustries.Zed" = "latest"
+"winget:Microsoft.VisualStudioCode" = "latest"
+"winget:t8y2.DBX" = "latest"
+
+# Archlinux UX Enhance
+"pacman:ibus-rime" = "latest"
+"aur:wox-bin" = "latest"
+# XXX: PixPin has no alternative on Linux currently.
+# XXX: Microsoft To Do has no alternative on Linux currently.
+"pacman:obs-studio" = "latest"
+# Terminal & Shell on Windows
+"pacman:rio" = "latest"
+# Development on Archlinux
+"pacman:zed" = "latest"
+"aur:visual-studio-code-bin" = "latest"
+"aur:dbx-bin" = "latest"
+
+[dotfiles."dotfiles/vscode/snippets/"]
+mode = "copy"
+source = "dotfiles/vscode/snippets/"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/Code/User/snippets/" },
+  { os = "linux", target = "~/.config/Code/User/snippets/" },
+  { os = "windows", target = "~/AppData/Roaming/Code/User/snippets/" },
+]
+
+[dotfiles."dotfiles/vscode/extensions-default.json"]
+mode = "copy"
+source = "dotfiles/vscode/extensions-default.json"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/Code/User/extensions-default.json" },
+  { os = "linux", target = "~/.config/Code/User/extensions-default.json" },
+  { os = "windows", target = "~/AppData/Roaming/Code/User/extensions-default.json" },
+]
+
+[dotfiles."dotfiles/vscode/extensions-full.json"]
+mode = "copy"
+source = "dotfiles/vscode/extensions-full.json"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/Code/User/extensions-full.json" },
+  { os = "linux", target = "~/.config/Code/User/extensions-full.json" },
+  { os = "windows", target = "~/AppData/Roaming/Code/User/extensions-full.json" },
+]
+
+[dotfiles."dotfiles/vscode/keybindings.json"]
+mode = "copy"
+source = "dotfiles/vscode/keybindings.json"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/Code/User/keybindings.json" },
+  { os = "linux", target = "~/.config/Code/User/keybindings.json" },
+  { os = "windows", target = "~/AppData/Roaming/Code/User/keybindings.json" },
+]
+
+[dotfiles."dotfiles/vscode/settings.json"]
+mode = "copy"
+source = "dotfiles/vscode/settings.json"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/Code/User/settings.json" },
+  { os = "linux", target = "~/.config/Code/User/settings.json" },
+  { os = "windows", target = "~/AppData/Roaming/Code/User/settings.json" },
+]
+
+[dotfiles."dotfiles/rime/default.custom.yaml"]
+mode = "copy"
+source = "dotfiles/rime/default.custom.yaml"
+variants = [
+  { os = "macos", target = "~/Library/Rime/default.custom.yaml" },
+  { os = "linux", target = "~/.config/ibus/rime/default.custom.yaml" },
+  # If you are using fcitx5 instead of ibus.
+  # { os = "linux", target = "~/.local/shared/fcitx5/rime/default.custom.yaml" },
+  { os = "windows", target = "~/AppData/Roaming/Rime/default.custom.yaml" },
+]
+
+[dotfiles."dotfiles/rime/double_pinyin_flypy.custom.yaml"]
+mode = "copy"
+source = "dotfiles/rime/double_pinyin_flypy.custom.yaml"
+variants = [
+  { os = "macos", target = "~/Library/Rime/double_pinyin_flypy.custom.yaml" },
+  { os = "linux", target = "~/.config/ibus/rime/double_pinyin_flypy.custom.yaml" },
+  # If you are using fcitx5 instead of ibus.
+  # { os = "linux", target = "~/.local/shared/fcitx5/rime/double_pinyin_flypy.custom.yaml" },
+  { os = "windows", target = "~/AppData/Roaming/Rime/double_pinyin_flypy.custom.yaml" },
+]
+
+[dotfiles."dotfiles/rime/weasel.custom.yaml"]
+mode = "copy"
+source = "dotfiles/rime/weasel.custom.yaml"
+variants = [
+  { os = "macos", target = "~/Library/Rime/weasel.custom.yaml" },
+  { os = "linux", target = "~/.config/ibus/rime/weasel.custom.yaml" },
+  # If you are using fcitx5 instead of ibus.
+  # { os = "linux", target = "~/.local/shared/fcitx5/rime/weasel.custom.yaml" },
+  { os = "windows", target = "~/AppData/Roaming/Rime/weasel.custom.yaml" },
+]
+
+[dotfiles."dotfiles/zed/extensions.json"]
+mode = "copy"
+source = "dotfiles/zed/extensions.json"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/Zed/extensions.json" },
+  { os = "linux", target = "~/.config/Zed/extensions.json" },
+  { os = "windows", target = "~/AppData/Roaming/Zed/extensions.json" },
+]
+
+[dotfiles."dotfiles/zed/keymap.json"]
+mode = "copy"
+source = "dotfiles/zed/keymap.json"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/Zed/keymap.json" },
+  { os = "linux", target = "~/.config/Zed/keymap.json" },
+  { os = "windows", target = "~/AppData/Roaming/Zed/keymap.json" },
+]
+
+[dotfiles."dotfiles/zed/settings.json"]
+mode = "copy"
+source = "dotfiles/zed/settings.json"
+variants = [
+  { os = "macos", target = "~/Library/Application Support/Zed/settings.json" },
+  { os = "linux", target = "~/.config/Zed/settings.json" },
+  { os = "windows", target = "~/AppData/Roaming/Zed/settings.json" },
+]
+
+[dotfiles."dotfiles/rio/config.toml"]
+mode = "copy"
+source = "dotfiles/rio/config.toml"
+variants = [
+  { os = "unix", target = "~/.config/rio/config.toml" },
+  { os = "windows", target = "~/AppData/Local/rio/config.toml" },
+]
+
+[tasks.bootstrap]
+run = '''
+#!/usr/bin/env nu
+
+def run-script [script: path] {
+  print $'==> ($script)'
+  let ok = (try {
+    ^nu $script
+    true
+  } catch {
+    false
+  })
+  if not $ok {
+    let code = ($env.LAST_EXIT_CODE? | default 1)
+    print -e $'bootstrap: ($script) failed with exit code ($code)'
+    exit $code
+  }
+}
+
+def main [] {
+  let scripts_dir = ($nu.home-dir | path join '.config' 'mise' 'scripts')
+
+  # Run on every platform.
+  let shared = [
+    # Builds the PyYAML wheel mason needs when no prebuilt wheel exists for the
+    # active Python; warns and skips when one is already built or published.
+    ($nu.home-dir | path join '.local' 'bin' 'build-pyyaml.nu')
+  ]
+
+  # Windows-only setup.
+  let windows = [
+    ($scripts_dir | path join 'windows-terminal' 'patch-settings.json.nu')
+    ($scripts_dir | path join 'windows-terminal-preview' 'patch-settings.json.nu')
+    ($scripts_dir | path join 'disable-ctrl-space.nu')
+    ($scripts_dir | path join 'set-cc-cxx.nu')
+    ($scripts_dir | path join 'set-editor-visual.nu')
+    ($scripts_dir | path join 'set-yazi-file-one.nu')
+    ($nu.home-dir | path join '.local' 'bin' 'set-cjk-font-fallback.nu')
+  ]
+
+  for script in $shared {
+    run-script $script
+  }
+
+  if $nu.os-info.name == 'windows' {
+    for script in $windows {
+      run-script $script
+    }
+    print -e '⚠️ Please install Rime Nightly Build from GitHub Release: https://github.com/rime/weasel/releases/tag/latest. My configuration requires librime v1.14.0+, and the latest stable version still uses librime v1.13.1.'
+  }
+}
+'''

@@ -1,0 +1,73 @@
+# User information
+[user]
+  name = Lyra Chanter
+  email = github@lumirelle.me
+
+# Core
+[core]
+  longpaths = true
+  fsmonitor = true
+[feature]
+  # Will enable some default configurations to better handle a large number of files, include "index.version=4".
+  # See https://git-scm.com/docs/git-config#Documentation/git-config.txt-featuremanyFiles.
+  manyFiles = true
+
+[init]
+  defaultBranch = main
+
+[column]
+  ui = auto
+
+# Edit
+[blame]
+  ignoreRevsFile = ":(optional).git-blame-ignore-revs"
+  # See https://www.michaelheap.com/git-ignore-rev/
+  markIgnoredLines = true
+  markUnblamableLines = true
+[diff]
+  algorithm = histogram
+  context = 5
+  colorMoved = zebra
+
+# Working with branches
+[branch]
+  sort = -committerdate
+[merge]
+  autostash = true
+  conflictstyle = zdiff3
+[rebase]
+  autostash = true
+  autosquash = true
+  updateRefs = true
+[rerere]
+  enabled = true
+  autoUpdate = true
+[tag]
+  sort = -version:refname
+
+# Working with remotes
+[fetch]
+  prune = true
+  writeCommitGraph = true
+[pull]
+  rebase = true
+[push]
+  default = current
+  autoSetupRemote = true
+  useForceIfIncludes = true
+
+[log]
+  date = short
+
+[alias]
+  wt = worktree
+  sm = submodule
+
+# Global hooks
+[hook "hk-pre-commit"]
+  command = test "${HK:-1}" = 0 || ! hk --version >/dev/null 2>&1 || hk run pre-commit --from-hook "$@"
+  event = pre-commit
+
+# Local override
+[include]
+  path = .local.gitconfig
