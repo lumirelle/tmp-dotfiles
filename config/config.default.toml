@@ -10,9 +10,8 @@
 # XXX: Please install Rime Nightly Build from GitHub Release: https://github.com/rime/weasel/releases/tag/latest
 # My configuration requires librime v1.14.0+, and the latest stable version still uses librime v1.13.1.
 # "winget:Rime.Weasel" = "latest"
-"winget:Wox.Wox" = "latest"
 "winget:PixPin.PixPin" = "latest"
-"winget:9NBLGGH5R558" = "latest" # Microsoft To Do
+"winget:JohannesMillan.superProductivity" = "latest"
 "winget:OBSProject.OBSStudio" = "latest"
 # Terminal & Shell on Windows
 "winget:raphamorim.rio" = "latest"
@@ -25,7 +24,7 @@
 "pacman:ibus-rime" = "latest"
 "aur:wox-bin" = "latest"
 # XXX: PixPin has no alternative on Linux currently.
-# XXX: Microsoft To Do has no alternative on Linux currently.
+"pacman:super-productivity" = "latest"
 "pacman:obs-studio" = "latest"
 # Terminal & Shell on Windows
 "pacman:rio" = "latest"
