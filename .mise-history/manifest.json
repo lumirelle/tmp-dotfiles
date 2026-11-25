@@ -110,12 +110,6 @@
       "variants": []
     },
     {
-      "path": "home/.config/jj/config.toml",
-      "autosave": true,
-      "encrypt": false,
-      "variants": []
-    },
-    {
       "path": "home/.config/starship.toml",
       "autosave": true,
       "encrypt": false,

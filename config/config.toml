@@ -23,7 +23,6 @@ activate_shims = false
 # Windows Environment/Infrastructure
 "winget:BrechtSanders.WinLibs.POSIX.UCRT" = "latest"
 "winget:FiloSottile.age" = "latest"
-"winget:jj-vcs.jj" = "latest"
 "winget:GitHub.cli" = "latest"
 "winget:GLab.GLab" = "latest"
 "winget:tree-sitter.tree-sitter-cli" = "latest"
@@ -62,7 +61,6 @@ activate_shims = false
 "pacman:fontconfig" = "latest"
 "pacman:noto-fonts-cjk" = "latest"
 "pacman:age" = "latest"
-"pacman:jujutsu" = "latest"
 "pacman:github-cli" = "latest"
 "pacman:glab" = "latest"
 "pacman:tree-sitter-cli" = "latest"
@@ -108,7 +106,6 @@ zig = "latest"
 
 [dotfiles]
 "~/.bashrc" = { mode = "track" }
-"~/.config/jj/config.toml" = { mode = "track" }
 "~/.config/mise/config.default.toml" = { mode = "track" }
 "~/.config/mise/config.toml" = { mode = "track" }
 "~/.config/mise/dotfiles/lazygit" = { mode = "track" }
