@@ -38,8 +38,6 @@ export def --env wt [
     | default ($env.GIT_BARE_ROOT? | default ($nu.home-dir | path join "git"))
   )
   let wt_root = ($root | path join ".worktrees")
-  # glob wants forward slashes, even where path join wrote backslashes
-  let wt_glob_root = ($wt_root | str replace --all '\' '/')
 
   # wt add: <root>/.worktrees/{repo}/{branch}, then cd into it
   if $sub == "add" {
@@ -76,29 +74,41 @@ export def --env wt [
     $sub != "ls" and ((^git rev-parse --git-dir | complete) | get exit_code) == 0
   )
 
-  # Every worktree under <root>/.worktrees, found by the .git file each one
-  # carries. The repo name is the first folder under the worktrees dir.
+  # Every worktree under <root>/.worktrees: walk down until a directory holds a
+  # .git, then stop. Stopping at the .git keeps node_modules out of the walk and
+  # keeps a worktree's submodules from being listed as worktrees of their own.
+  # The repo name is the first folder under the worktrees dir, and the branch is
+  # read straight from the worktree's HEAD file - no git subprocess per entry.
   let all_worktrees = {||
     if not ($wt_root | path exists) {
       error make { msg: $"wt: no such directory: ($wt_root)" }
     }
-    glob $"($wt_glob_root)/**/.git"
-    | where {|p| ($p | path type) == "file" }
-    | each {|p| $p | path dirname }
-    | uniq
-    | each {|dir|
-        let r = (^git -C $dir rev-parse --abbrev-ref HEAD | complete)
-        if $r.exit_code != 0 {
-          null
+    let dirs = (do {
+      mut queue = [$wt_root]
+      mut out = []
+      while ($queue | is-not-empty) {
+        let dir = ($queue | first)
+        $queue = ($queue | skip 1)
+        if (($dir | path join ".git") | path exists) {
+          $out = ($out | append $dir)
         } else {
-          let head = ($r.stdout | str trim)
+          $queue = ($queue | append (ls -a $dir | where type == dir | get name))
+        }
+      }
+      $out
+    })
+    $dirs
+    | par-each {|dir|
+        try {
+          let gd = (open ($dir | path join ".git") | str trim | str replace --regex '^gitdir: ' '')
+          let head = (open (($dir | path join $gd) | path join "HEAD") | str trim)
           let rel = ($dir | path relative-to $wt_root)
           {
             repo: ($rel | path split | first | str replace --regex '\.git$' '')
-            branch: (if ($head == "HEAD") { "detached" } else { $head })
+            branch: (if ($head | str starts-with "ref: refs/heads/") { $head | str replace 'ref: refs/heads/' '' } else { "detached" })
             path: $dir
           }
-        }
+        } catch { null }
       }
     | where {|r| $r != null }
   }
