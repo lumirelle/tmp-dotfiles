@@ -54,6 +54,16 @@ alias ff='fastfetch'
 alias wgt='winget'
 alias pcm='pacman'
 ## git
+# Walk a tree and stop at the first directory holding .git. Stopping there keeps
+# node_modules out of the walk and keeps a worktree's submodules from being
+# listed as worktrees of their own.
+_wt_walk() {
+  local dir=$1 entry
+  if [[ -e $dir/.git ]]; then printf '%s\n' "$dir"; return; fi
+  for entry in "$dir"/*/ "$dir"/.[!.]*/; do
+    [[ -d $entry ]] && _wt_walk "${entry%/}"
+  done
+}
 function wt {
   local sub='' root='' repo='' branch_arg='' help=0
   while (( $# )); do
@@ -169,16 +179,24 @@ EOF
     done < <(git worktree list --porcelain 2>/dev/null; printf '\n')
   else
     [[ -d $wt_root ]] || { printf 'wt: no such directory: %s\n' "$wt_root" >&2; return 1; }
+    local d gd head
     while IFS= read -r d; do
-      d=${d%/.git}
-      branch=$(git -C "$d" rev-parse --abbrev-ref HEAD 2>/dev/null) || continue
-      [[ -n $branch ]] || continue
-      [[ $branch == HEAD ]] && branch=detached
+      gd=$(<"$d/.git") || continue
+      gd=${gd#gitdir: }
+      gd=${gd%$'\r'}
+      case $gd in /*|[A-Za-z]:*) ;; *) gd=$d/$gd ;; esac
+      head=$(<"$gd/HEAD") || continue
+      head=${head%$'\r'}
+      if [[ $head == 'ref: refs/heads/'* ]]; then
+        branch=${head#ref: refs/heads/}
+      else
+        branch=detached
+      fi
       rel=${d#"$wt_root"/}
       repo_name=${rel%%/*}
       repo_name=${repo_name%.git}
       rows+=("$repo_name  $branch  $d"$'\t'"$repo_name"$'\t'"$branch"$'\t'"$d")
-    done < <(/usr/bin/find "$wt_root" -name .git -type f 2>/dev/null)
+    done < <(_wt_walk "$wt_root")
   fi
 
   if (( ${#rows[@]} == 0 )); then

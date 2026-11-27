@@ -184,11 +184,32 @@ usage: wt [subcommand] [args]
     }
   } else {
     if (-not (Test-Path -LiteralPath $wtRoot)) { Write-Error "wt: no such directory: $wtRoot"; return }
-    foreach ($gitFile in Get-ChildItem -LiteralPath $wtRoot -Recurse -Force -File -Filter '.git' -ErrorAction SilentlyContinue) {
-      $dir = $gitFile.DirectoryName
-      $branch = (& git -C $dir rev-parse --abbrev-ref HEAD 2>$null)
-      if ($LASTEXITCODE -ne 0) { continue }
-      if ($branch -eq 'HEAD') { $branch = 'detached' }
+    # Walk down until a directory holds a .git, then stop: node_modules is never
+    # entered and a worktree's submodules are not listed as worktrees.
+    $queue = [System.Collections.Generic.Queue[string]]::new()
+    $queue.Enqueue($wtRoot)
+    $dirs = [System.Collections.Generic.List[string]]::new()
+    while ($queue.Count -gt 0) {
+      $dir = $queue.Dequeue()
+      if (Test-Path -LiteralPath (Join-Path $dir '.git')) {
+        $dirs.Add($dir)
+      } else {
+        foreach ($child in Get-ChildItem -LiteralPath $dir -Force -Directory -ErrorAction SilentlyContinue) {
+          $queue.Enqueue($child.FullName)
+        }
+      }
+    }
+    foreach ($dir in $dirs) {
+      $gitFile = Join-Path $dir '.git'
+      if (-not (Test-Path -LiteralPath $gitFile -PathType Leaf)) { continue }
+      $gd = (Get-Content -LiteralPath $gitFile -Raw -ErrorAction SilentlyContinue)
+      if (-not $gd) { continue }
+      $gd = ($gd.Trim() -replace '^gitdir: ', '')
+      if (-not [System.IO.Path]::IsPathRooted($gd)) { $gd = Join-Path $dir $gd }
+      $head = Get-Content -LiteralPath (Join-Path $gd 'HEAD') -Raw -ErrorAction SilentlyContinue
+      if ($null -eq $head) { continue }
+      $head = $head.Trim()
+      $branch = if ($head.StartsWith('ref: refs/heads/')) { $head.Substring(16) } else { 'detached' }
       $rel = $dir.Substring($wtRoot.Length).TrimStart('\', '/')
       $repoName = (($rel -split '[\\/]')[0]) -replace '\.git$', ''
       $rows += [pscustomobject]@{ Repo = $repoName; Branch = $branch; Path = $dir; Display = "$repoName  $branch  $dir" }
